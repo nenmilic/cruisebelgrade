@@ -1,0 +1,246 @@
+---
+import { boat } from "../lib/config";
+
+interface Props {
+  tours: { slug: string; title: string }[];
+  selected?: string;
+}
+
+const { tours, selected } = Astro.props;
+const guestOptions = Array.from({ length: boat.maxGuests }, (_, i) => i + 1);
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<form class="enq" id="booking-form" method="post" action="/api/booking">
+  <div class="enq__grid">
+    <label class="f f--wide">
+      <span>Which trip</span>
+      <select name="tourSlug" required>
+        {
+          tours.map((t) => (
+            <option value={t.slug} selected={t.slug === selected}>
+              {t.title}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+
+    <label class="f">
+      <span>Date you'd like</span>
+      <input type="date" name="preferredDate" min={today} required />
+    </label>
+
+    <label class="f">
+      <span>Guests</span>
+      <select name="guests" required>
+        {guestOptions.map((n) => <option value={n} selected={n === 2}>{n}</option>)}
+      </select>
+    </label>
+
+    <label class="f">
+      <span>Your name</span>
+      <input type="text" name="name" autocomplete="name" required />
+    </label>
+
+    <label class="f">
+      <span>Email</span>
+      <input type="email" name="email" autocomplete="email" required />
+    </label>
+
+    <label class="f f--wide">
+      <span>Phone or WhatsApp <em>optional, but faster</em></span>
+      <input type="tel" name="phone" autocomplete="tel" />
+    </label>
+
+    <label class="f f--wide">
+      <span>Anything I should know <em>optional</em></span>
+      <textarea
+        name="message"
+        rows="3"
+        placeholder="Dietary needs, children, someone with limited mobility, a rough time of day."
+      ></textarea>
+    </label>
+  </div>
+
+  <!-- Honeypot: hidden from people, filled in by most bots. -->
+  <div class="hp" aria-hidden="true">
+    <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+  </div>
+
+  <input type="hidden" name="tourTitle" value="" />
+
+  <div class="enq__foot">
+    <button class="btn" type="submit">Send enquiry</button>
+    <p class="enq__note">
+      No payment now. I reply within a few hours to confirm the date and the
+      pontoon.
+    </p>
+  </div>
+
+  <p class="enq__status" id="booking-status" role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("#booking-form");
+  const status = document.querySelector<HTMLParagraphElement>("#booking-status");
+
+  if (form && status) {
+    const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
+    const tourSelect = form.querySelector<HTMLSelectElement>("[name=tourSlug]");
+    const titleField = form.querySelector<HTMLInputElement>("[name=tourTitle]");
+
+    // Carry the readable tour name through so notifications don't show a slug.
+    const syncTitle = () => {
+      if (tourSelect && titleField) {
+        titleField.value = tourSelect.selectedOptions[0]?.text ?? "";
+      }
+    };
+    syncTitle();
+    tourSelect?.addEventListener("change", syncTitle);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.textContent = "";
+      status.dataset.state = "";
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Sending…";
+      }
+
+      const data = Object.fromEntries(new FormData(form));
+
+      // Where the visitor came from. Tells you which video is selling trips.
+      const params = new URLSearchParams(location.search);
+      const source: Record<string, string> = {};
+      for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content"]) {
+        const value = params.get(key);
+        if (value) source[key] = value;
+      }
+      if (document.referrer) source.referrer = document.referrer;
+
+      try {
+        const res = await fetch("/api/booking", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, source }),
+        });
+        const body = await res.json();
+
+        if (body.ok) {
+          form.reset();
+          syncTitle();
+          status.dataset.state = "ok";
+          status.textContent =
+            "Got it. I'll come back to you shortly to confirm the date.";
+        } else {
+          status.dataset.state = "bad";
+          status.textContent = body.error ?? "Something went wrong. Please try again.";
+        }
+      } catch {
+        status.dataset.state = "bad";
+        status.textContent =
+          "The message didn't send. Check your connection, or write to hello@cruisebelgrade.rs.";
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = "Send enquiry";
+        }
+      }
+    });
+  }
+</script>
+
+<style>
+  .enq {
+    background: var(--stone);
+    color: var(--ink);
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    border: 1px solid rgba(16, 26, 28, 0.16);
+    border-radius: 3px;
+  }
+
+  .enq__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem 1.4rem;
+  }
+
+  .f {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+  .f--wide {
+    grid-column: 1 / -1;
+  }
+
+  .f > span {
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .f em {
+    font-style: normal;
+    font-weight: 400;
+    color: rgba(16, 26, 28, 0.55);
+  }
+
+  input,
+  select,
+  textarea {
+    font: inherit;
+    font-size: 1rem;
+    color: inherit;
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    background: #fff;
+    border: 1px solid rgba(16, 26, 28, 0.28);
+    border-radius: 2px;
+  }
+  textarea {
+    resize: vertical;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--shallow);
+  }
+
+  .hp {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .enq__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: 1.6rem;
+  }
+  .enq__note {
+    margin: 0;
+    font-size: 0.86rem;
+    color: rgba(16, 26, 28, 0.65);
+    max-width: 30ch;
+  }
+
+  .enq__status {
+    margin: 1rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .enq__status[data-state="ok"] {
+    color: var(--reed);
+  }
+  .enq__status[data-state="bad"] {
+    color: #9c3b1f;
+  }
+
+  @media (max-width: 34rem) {
+    .enq__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

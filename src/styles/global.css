@@ -1,0 +1,169 @@
+/*
+  Palette taken from the rivers themselves rather than a stock scheme:
+  the Danube in shade, the Sava's silt, willow and reed on the bank,
+  varnished boat timber, Kalemegdan limestone.
+*/
+:root {
+  --danube: #0e2a31;
+  --danube-lift: #163b42;
+  --shallow: #24565a;
+  --reed: #6e7a4f;
+  --silt: #a89968;
+  --varnish: #c08a2e;
+  --stone: #e4e2d8;
+  --stone-dim: #b9b7ab;
+  --ink: #101a1c;
+
+  --measure: 62ch;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --rhythm: clamp(3.5rem, 9vw, 7rem);
+
+  --display: "Newsreader", Georgia, serif;
+  --body: "Karla", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--stone);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  line-height: 1.65;
+  font-synthesis-weight: none;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-variation-settings: "opsz" 36;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.6rem, 7.5vw, 5.25rem);
+}
+
+h2 {
+  font-size: clamp(1.9rem, 4.2vw, 3.1rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  line-height: 1.2;
+}
+
+p {
+  margin: 0 0 1.1em;
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--varnish);
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: min(100% - var(--gutter) * 2, 76rem);
+  margin-inline: auto;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+.skip:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 99;
+  background: var(--stone);
+  padding: 0.6rem 1rem;
+}
+
+/* ---- Section marker -------------------------------------------------
+   River kilometre markers. These are real: the Danube is measured in
+   rkm from the delta, and boats navigate by them. Used here because the
+   page genuinely runs downstream, not as decoration.
+--------------------------------------------------------------------- */
+.rkm {
+  font-family: var(--body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--reed);
+  display: block;
+  margin-bottom: 0.9rem;
+}
+
+/* ---- Buttons -------------------------------------------------------- */
+.btn {
+  display: inline-block;
+  font-family: var(--body);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.85rem 1.6rem;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: var(--ink);
+  color: var(--stone);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.btn:hover {
+  background: var(--varnish);
+  border-color: var(--varnish);
+  color: var(--ink);
+}
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+}
+.btn--ghost:hover {
+  background: var(--ink);
+  color: var(--stone);
+}

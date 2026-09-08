@@ -1,0 +1,220 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import BookingForm from "../../components/BookingForm.astro";
+import { site } from "../../lib/config";
+
+export async function getStaticPaths() {
+  const tours = await getCollection("tours", ({ data }) => !data.draft);
+  return tours.map((tour) => ({
+    params: { slug: tour.slug },
+    props: { tour, all: tours.sort((a, b) => a.data.order - b.data.order) },
+  }));
+}
+
+interface Props {
+  tour: CollectionEntry<"tours">;
+  all: CollectionEntry<"tours">[];
+}
+
+const { tour, all } = Astro.props;
+const { Content } = await tour.render();
+const formTours = all.map((t) => ({ slug: t.slug, title: t.data.shortTitle }));
+---
+
+<Base title={`${tour.data.title} — ${site.name}`} description={tour.data.summary}>
+  <header class="th">
+    <div class="wrap">
+      <a class="th__back" href="/">Back to both trips</a>
+      <h1>{tour.data.title}</h1>
+      <p class="th__facts">
+        {tour.data.duration} · {tour.data.groupSize.min}–{tour.data.groupSize.max}
+        {" "}guests · {tour.data.season.from} to {tour.data.season.to}
+      </p>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="body">
+      <div class="wrap body__inner">
+        <div class="prose"><Content /></div>
+
+        <aside class="incl">
+          {
+            tour.data.price.includes.length > 0 && (
+              <>
+                <h2 class="incl__h">Included</h2>
+                <ul>
+                  {tour.data.price.includes.map((i) => (
+                    <li>{i}</li>
+                  ))}
+                </ul>
+              </>
+            )
+          }
+          {
+            tour.data.price.excludes.length > 0 && (
+              <>
+                <h2 class="incl__h">Not included</h2>
+                <ul class="incl__no">
+                  {tour.data.price.excludes.map((i) => (
+                    <li>{i}</li>
+                  ))}
+                </ul>
+              </>
+            )
+          }
+        </aside>
+      </div>
+    </section>
+
+    {
+      tour.data.itinerary.length > 0 && (
+        <section class="plan" aria-labelledby="plan-h">
+          <div class="wrap">
+            <p class="rkm">Downstream</p>
+            <h2 id="plan-h">How the day runs</h2>
+
+            <ol class="plan__list">
+              {tour.data.itinerary.map((stop) => (
+                <li class="stop">
+                  <div class="stop__when">
+                    {stop.minutes ? `${stop.minutes} min` : ""}
+                  </div>
+                  <div class="stop__what">
+                    <h3>{stop.title}</h3>
+                    <p>{stop.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )
+    }
+
+    <section class="book" id="book">
+      <div class="wrap book__inner">
+        <div>
+          <p class="rkm">Booking</p>
+          <h2>Tell me when</h2>
+          <p>Nothing is charged now. I confirm the date first.</p>
+        </div>
+        <BookingForm tours={formTours} selected={tour.slug} />
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .th {
+    background: var(--danube);
+    color: var(--stone);
+    padding: clamp(3rem, 9vh, 6rem) 0 clamp(2.5rem, 7vh, 4.5rem);
+  }
+  .th h1 {
+    color: var(--stone);
+    font-weight: 300;
+    max-width: 20ch;
+  }
+  .th__back {
+    display: inline-block;
+    font-size: 0.88rem;
+    color: var(--silt);
+    margin-bottom: 1.8rem;
+  }
+  .th__facts {
+    margin: 1.3rem 0 0;
+    color: var(--stone-dim);
+    font-size: 0.95rem;
+  }
+
+  .body {
+    padding: var(--rhythm) 0 0;
+  }
+  .body__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  .prose :global(p) {
+    font-size: 1.06rem;
+  }
+
+  .incl {
+    border-top: 2px solid var(--ink);
+    padding-top: 1.2rem;
+  }
+  .incl__h {
+    font-family: var(--body);
+    font-size: 0.86rem;
+    font-weight: 700;
+    margin: 1.3rem 0 0.5rem;
+  }
+  .incl__h:first-child {
+    margin-top: 0;
+  }
+  .incl ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.95rem;
+  }
+  .incl__no {
+    color: rgba(16, 26, 28, 0.6);
+  }
+
+  .plan {
+    padding: var(--rhythm) 0;
+  }
+  .plan__list {
+    list-style: none;
+    margin: 2.5rem 0 0;
+    padding: 0;
+  }
+  .stop {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: 1.5rem;
+    padding: 1.6rem 0;
+    border-top: 1px solid rgba(16, 26, 28, 0.2);
+  }
+  .stop__when {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--reed);
+    padding-top: 0.28rem;
+  }
+  .stop__what p {
+    margin: 0.5rem 0 0;
+  }
+
+  .book {
+    background: var(--danube);
+    color: var(--stone-dim);
+    padding: var(--rhythm) 0;
+  }
+  .book h2 {
+    color: var(--stone);
+  }
+  .book__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  .book p {
+    margin-top: 1.2rem;
+  }
+
+  @media (max-width: 52rem) {
+    .body__inner,
+    .book__inner {
+      grid-template-columns: 1fr;
+    }
+    .stop {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
+  }
+</style>

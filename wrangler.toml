@@ -1,0 +1,11 @@
+name = "cruisebelgrade"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+# Uncomment once you create the KV namespace:
+#   npx wrangler kv namespace create ENQUIRIES
+# It keeps a copy of every enquiry, so a failed email is not a lost customer.
+# [[kv_namespaces]]
+# binding = "ENQUIRIES"
+# id = "paste-the-id-here"

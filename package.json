@@ -1,0 +1,24 @@
+{
+  "name": "cruisebelgrade",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "wrangler pages dev dist",
+    "check": "astro check",
+    "deploy": "astro build && wrangler pages deploy dist"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.0.0",
+    "@astrojs/sitemap": "^3.2.0",
+    "astro": "^5.0.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "typescript": "^5.7.0",
+    "wrangler": "^3.90.0"
+  }
+}

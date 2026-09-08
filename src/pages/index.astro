@@ -1,0 +1,312 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import BookingForm from "../components/BookingForm.astro";
+import { site, boat, meetingPoint, captain } from "../lib/config";
+
+const tours = (await getCollection("tours", ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const formTours = tours.map((t) => ({ slug: t.slug, title: t.data.shortTitle }));
+---
+
+<Base>
+  <header class="hero">
+    <div class="wrap hero__inner">
+      <p class="hero__kicker">{meetingPoint.label} · {site.city}</p>
+      <h1>The riverside places locals keep to themselves</h1>
+      <p class="hero__lede">
+        Small-boat trips down the Sava and the Danube to fish restaurants set
+        back in the trees along the bank. Six guests at a time, no coach party,
+        no schedule but ours.
+      </p>
+      <a class="btn hero__cta" href="#book">Check a date</a>
+    </div>
+    <div class="hero__seam" aria-hidden="true"></div>
+  </header>
+
+  <main id="main">
+    <section class="intro">
+      <div class="wrap intro__inner">
+        <p class="rkm">rkm 1170 — Sava confluence</p>
+        <p class="intro__text">
+          These places have roads to them. They are just far enough back that
+          nobody arrives by accident, and the way in has always been the water.
+          You tie up a few steps from the table, eat what came out of the river
+          that morning, and go back the way you came.
+        </p>
+      </div>
+    </section>
+
+    <section class="trips" aria-labelledby="trips-heading">
+      <div class="wrap">
+        <p class="rkm">Two trips</p>
+        <h2 id="trips-heading">Pick the one that suits the day</h2>
+
+        <div class="trips__list">
+          {
+            tours.map((tour, i) => (
+              <article class="trip">
+                <div class="trip__head">
+                  <h3>{tour.data.title}</h3>
+                  <p class="trip__facts">
+                    {tour.data.duration} · {tour.data.groupSize.min}–
+                    {tour.data.groupSize.max} guests · {tour.data.season.from} to{" "}
+                    {tour.data.season.to}
+                  </p>
+                </div>
+
+                <div class="trip__body">
+                  <p>{tour.data.summary}</p>
+
+                  {tour.data.price.includes.length > 0 && (
+                    <ul class="trip__inc">
+                      {tour.data.price.includes.map((item) => (
+                        <li>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <a class="btn btn--ghost trip__link" href={`/tours/${tour.slug}/`}>
+                    See the whole day
+                  </a>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="boat" aria-labelledby="boat-heading">
+      <div class="wrap boat__inner">
+        <div>
+          <p class="rkm">The boat</p>
+          <h2 id="boat-heading">A pasara, not a party barge</h2>
+          <p>
+            The pasara is the traditional Belgrade river boat. Mine is
+            {" "}{boat.hull.toLowerCase()}, which matters more than it sounds:
+            it cuts through the wake of passing barges instead of slapping over
+            it, so lunch stays where you left it on the way home.
+          </p>
+          <p>
+            {boat.engine}, shade, room to move, and {boat.maxGuests} guests at
+            most. I am at the tiller the whole way, so ask me anything —
+            about the river, the city, or where the fish came from.
+          </p>
+        </div>
+        <dl class="spec">
+          <div><dt>Boat</dt><dd>{boat.type}</dd></div>
+          <div><dt>Hull</dt><dd>{boat.hull}</dd></div>
+          <div><dt>Engine</dt><dd>{boat.engine}</dd></div>
+          <div><dt>Guests</dt><dd>Up to {boat.maxGuests}</dd></div>
+          <div><dt>Leaves from</dt><dd>{meetingPoint.label}</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="book" id="book" aria-labelledby="book-heading">
+      <div class="wrap book__inner">
+        <div class="book__aside">
+          <p class="rkm">Booking</p>
+          <h2 id="book-heading">Tell me when</h2>
+          <p>
+            Send the date and I'll confirm whether it's free, usually within a
+            few hours. Nothing is charged now.
+          </p>
+          <p class="book__direct">
+            Rather write directly?<br />
+            <a href={`mailto:${captain.email}`}>{captain.email}</a><br />
+            <a href={`tel:${captain.phoneE164}`}>{captain.phone}</a>
+          </p>
+        </div>
+
+        <div class="book__form">
+          <BookingForm tours={formTours} />
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  /* --- Hero: dark water, headline sitting low like a boat in it --- */
+  .hero {
+    background:
+      linear-gradient(180deg, rgba(14, 42, 49, 0.55) 0%, rgba(14, 42, 49, 0.92) 78%),
+      var(--danube);
+    color: var(--stone);
+    padding: clamp(5rem, 16vh, 10rem) 0 clamp(3.5rem, 9vh, 6rem);
+    position: relative;
+  }
+  .hero__inner {
+    max-width: 54rem;
+  }
+  .hero__kicker {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--silt);
+    margin: 0 0 1.4rem;
+  }
+  .hero h1 {
+    color: var(--stone);
+    font-variation-settings: "opsz" 60;
+    font-weight: 300;
+  }
+  .hero__lede {
+    margin-top: 1.6rem;
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    color: var(--stone-dim);
+    max-width: 46ch;
+  }
+  .hero__cta {
+    margin-top: 1.4rem;
+    background: var(--varnish);
+    border-color: var(--varnish);
+    color: var(--ink);
+  }
+  .hero__cta:hover {
+    background: var(--stone);
+    border-color: var(--stone);
+  }
+
+  /*
+    The seam. Where the Sava meets the Danube the two waters run side by
+    side before they mix, and you can see the line. This is the one
+    decorative moment on the page and it is doing that job.
+  */
+  .hero__seam {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--silt) 0%,
+      var(--silt) 38%,
+      var(--shallow) 52%,
+      var(--shallow) 100%
+    );
+  }
+
+  /* --- Intro --- */
+  .intro {
+    padding: var(--rhythm) 0;
+  }
+  .intro__inner {
+    max-width: 46rem;
+  }
+  .intro__text {
+    font-family: var(--display);
+    font-size: clamp(1.3rem, 2.6vw, 1.85rem);
+    font-variation-settings: "opsz" 28;
+    line-height: 1.42;
+    max-width: 34ch;
+  }
+
+  /* --- Trips: asymmetric, not identical cards --- */
+  .trips {
+    padding: 0 0 var(--rhythm);
+  }
+  .trips__list {
+    margin-top: 2.75rem;
+    display: grid;
+    gap: 2.5rem;
+  }
+  .trip {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 1.5rem 3rem;
+    padding-top: 2.25rem;
+    border-top: 1px solid rgba(16, 26, 28, 0.22);
+  }
+  .trip__facts {
+    margin: 0.7rem 0 0;
+    font-size: 0.88rem;
+    color: rgba(16, 26, 28, 0.62);
+  }
+  .trip__inc {
+    margin: 0 0 1.4rem;
+    padding-left: 1.1rem;
+    font-size: 0.94rem;
+    color: rgba(16, 26, 28, 0.78);
+  }
+  .trip__inc li {
+    margin-bottom: 0.25rem;
+  }
+  .trip__link {
+    font-size: 0.94rem;
+    padding: 0.65rem 1.2rem;
+  }
+
+  /* --- Boat --- */
+  .boat {
+    background: var(--danube);
+    color: var(--stone-dim);
+    padding: var(--rhythm) 0;
+  }
+  .boat h2 {
+    color: var(--stone);
+  }
+  .boat__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  .boat p {
+    margin-top: 1.4rem;
+  }
+  .spec {
+    margin: 0;
+    border-top: 1px solid rgba(228, 226, 216, 0.22);
+  }
+  .spec > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(228, 226, 216, 0.14);
+    font-size: 0.92rem;
+  }
+  .spec dt {
+    color: var(--silt);
+  }
+  .spec dd {
+    margin: 0;
+    color: var(--stone);
+    text-align: right;
+  }
+
+  /* --- Booking --- */
+  .book {
+    padding: var(--rhythm) 0;
+  }
+  .book__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  .book__aside p {
+    margin-top: 1.3rem;
+  }
+  .book__direct {
+    font-size: 0.95rem;
+    line-height: 1.9;
+  }
+
+  @media (max-width: 52rem) {
+    .trip,
+    .boat__inner,
+    .book__inner {
+      grid-template-columns: 1fr;
+    }
+    .boat__inner,
+    .book__inner {
+      gap: 2.25rem;
+    }
+  }
+</style>
