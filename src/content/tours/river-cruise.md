@@ -4,8 +4,8 @@ shortTitle: "River sightseeing cruise"
 summary: "The city from the water - the waterfront, the bridges, and the point below Kalemegdan where the two rivers meet."
 order: 0
 draft: false
-duration: "About 90 minutes"
-durationMinutes: 90
+duration: "About 180 minutes"
+durationMinutes: 180
 groupSize: { min: 2, max: 5 }
 price:
   amount: 50
@@ -23,13 +23,13 @@ itinerary:
     minutes: 10
   - title: "Down the Sava"
     detail: "Past the waterfront and under the bridges, with the city rising on both banks. This is the angle on Belgrade most visitors never see."
-    minutes: 35
+    minutes: 60
   - title: "The confluence"
     detail: "Below Kalemegdan the Sava runs into the Danube. On a clear day you can see the line where the two waters meet before they mix. We stop here for photographs."
-    minutes: 20
+    minutes: 45
   - title: "Back upriver"
     detail: "An easy run home to the same pontoon we left from."
-    minutes: 25
+    minutes: 60
 season:
   from: "April"
   to: "October"
