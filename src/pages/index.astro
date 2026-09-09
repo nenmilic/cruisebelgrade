@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import BookingForm from "../components/BookingForm.astro";
-import { site, boat, meetingPoint, captain, images, social, booking } from "../lib/config";
+import { site, boat, meetingPoint, captain, images, social } from "../lib/config";
 
 const tours = (await getCollection("tours", ({ data }) => !data.draft)).sort(
   (a, b) => a.data.order - b.data.order,
@@ -16,7 +16,10 @@ const lengths = tours.map((t) => t.data.durationMinutes).sort((a, b) => a - b);
 const prices = tours.map((t) => t.data.price.amount).filter((n) => n > 0);
 
 const facts = [
-  { value: `Up to ${boat.maxGuests}`, label: "guests on board" },
+  {
+    value: `${boat.comfortableGuests} or ${boat.maxGuests}`,
+    label: "guests on board",
+  },
   {
     value:
       lengths.length > 1 && lengths[0] !== lengths[lengths.length - 1]
@@ -106,7 +109,8 @@ function priceLabel(price: { amount: number; currency: string; per: string }) {
       <h1>The riverside places locals keep to themselves</h1>
       <p class="hero__lede">
         Small-boat trips down the Sava and the Danube to fish restaurants set
-        back in the trees. {boat.maxGuests} guests at a time, no coach party.
+        back in the trees. {boat.comfortableGuests} guests at a time, no coach
+        party.
       </p>
       <div class="hero__actions">
         <a class="btn" href="#book">Check a date</a>
@@ -209,9 +213,10 @@ function priceLabel(price: { amount: number; currency: string; per: string }) {
             it, so lunch stays where you left it on the way home.
           </p>
           <p>
-            Shade, room to move, and {boat.maxGuests} guests at most. I am at
-            the tiller the whole way, so ask me anything about the river, the
-            city, or where the fish came from.
+            Four guests have room to sit properly and move around. A fifth
+            fits when you are all one group and do not mind being close. I am
+            at the tiller the whole way, so ask me anything about the river,
+            the city, or where the fish came from.
           </p>
         </div>
 
@@ -219,7 +224,7 @@ function priceLabel(price: { amount: number; currency: string; per: string }) {
           <div><dt>Boat</dt><dd>{boat.type}</dd></div>
           <div><dt>Hull</dt><dd>{boat.hull}</dd></div>
           <div><dt>Engine</dt><dd>{boat.engine}</dd></div>
-          <div><dt>Guests</dt><dd>Up to {boat.maxGuests}</dd></div>
+          <div><dt>Guests</dt><dd>{boat.guestsLabel}</dd></div>
           <div><dt>Leaves from</dt><dd>{meetingPoint.label}</dd></div>
         </dl>
       </div>
@@ -231,8 +236,9 @@ function priceLabel(price: { amount: number; currency: string; per: string }) {
           <p class="eyebrow">Booking</p>
           <h2 id="book-heading">Tell me when</h2>
           <p>
-            Send a date and I'll confirm whether it's free, usually within a few
-            hours. Nothing is charged now.
+            Not sure which trip yet, or want to ask something first? Send a
+            message. To pick a time straight away, open the trip you want and
+            book a slot there.
           </p>
           <p class="book__direct">
             Rather write directly?<br />
@@ -242,27 +248,7 @@ function priceLabel(price: { amount: number; currency: string; per: string }) {
         </div>
 
         <div class="book__form">
-          {booking.calUrl ? (
-            <div class="cal">
-              <iframe
-                class="cal__frame"
-                src={booking.calUrl}
-                title="Choose a date and time"
-                loading="lazy"
-                allow="camera; microphone; autoplay; fullscreen; clipboard-write; payment"
-              ></iframe>
-              <p class="cal__note">{booking.note}</p>
-
-              <details class="cal__alt">
-                <summary>Rather send a message instead?</summary>
-                <div class="cal__altinner">
-                  <BookingForm tours={formTours} />
-                </div>
-              </details>
-            </div>
-          ) : (
-            <BookingForm tours={formTours} />
-          )}
+          <BookingForm tours={formTours} />
         </div>
       </div>
     </section>
@@ -730,80 +716,6 @@ function priceLabel(price: { amount: number; currency: string; per: string }) {
   }
   .book__direct a {
     color: var(--amber);
-  }
-
-  /* ---------- Cal embed ---------- */
-  .cal__frame {
-    width: 100%;
-    height: clamp(38rem, 78vh, 46rem);
-    border: 0;
-    border-radius: 10px;
-    background: var(--paper);
-    display: block;
-  }
-  .cal__note {
-    margin: 0.85rem 0 0;
-    font-size: 0.86rem;
-    color: var(--cream-dim);
-  }
-  .cal__alt {
-    margin-top: 1.4rem;
-    border-top: 1px solid var(--line);
-    padding-top: 1.1rem;
-  }
-  .cal__alt summary {
-    cursor: pointer;
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--amber);
-    list-style: none;
-  }
-  .cal__alt summary::-webkit-details-marker {
-    display: none;
-  }
-  .cal__alt summary::before {
-    content: "+ ";
-  }
-  .cal__alt[open] summary::before {
-    content: "\2212 ";
-  }
-  .cal__altinner {
-    margin-top: 1.1rem;
-  }
-
-  @media (max-width: 46rem) {
-    .also__fee {
-      display: none;
-    }
-    .watermark {
-      left: 50%;
-      top: auto;
-      bottom: 1.5rem;
-      transform: translateX(-50%);
-      width: 11rem;
-      opacity: 0.14;
-    }
-  }
-
-  @media (max-width: 34rem) {
-    .aside {
-      width: 7.5rem;
-      top: 4.6rem;
-      right: 1rem;
-      gap: 0.7rem;
-    }
-    .glimpse {
-      border-width: 1px;
-    }
-    .also__label {
-      display: none;
-    }
-    .also__logos {
-      gap: 0.7rem;
-    }
-    .also__logos img {
-      height: 1.5rem;
-    }
   }
 
   @media (max-width: 40rem) {

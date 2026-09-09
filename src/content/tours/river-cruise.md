@@ -6,7 +6,7 @@ order: 0
 draft: false
 duration: "About 90 minutes"
 durationMinutes: 90
-groupSize: { min: 2, max: 6 }
+groupSize: { min: 2, max: 5 }
 price:
   amount: 50
   currency: "EUR"
@@ -33,6 +33,8 @@ itinerary:
 season:
   from: "April"
   to: "October"
+  # river-cruise.md
+calEvent: "cruise-belgrade-s-rivers-with-a-boat-captain"
 hero:  "/img/gazela-bridge-night-belgrade-river-cruise.jpg"
 ---
 

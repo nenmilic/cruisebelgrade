@@ -46,6 +46,11 @@ const tours = defineCollection({
       to: z.string(),
     }),
 
+    // Cal event slug for this trip, e.g. "hidden-fish-tables-on-the-sava-and-danube".
+    // Combined with booking.calBase to build the embed URL. Without it the
+    // tour page falls back to the enquiry form.
+    calEvent: z.string().optional(),
+
     hero: z.string().optional(),
     gallery: z.array(z.string()).default([]),
 

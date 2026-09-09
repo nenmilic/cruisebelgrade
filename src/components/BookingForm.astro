@@ -34,7 +34,11 @@ const today = new Date().toISOString().slice(0, 10);
     <label class="f">
       <span>Guests</span>
       <select name="guests" required>
-        {guestOptions.map((n) => <option value={n} selected={n === 2}>{n}</option>)}
+        {guestOptions.map((n) => (
+          <option value={n} selected={n === 2}>
+            {n > boat.comfortableGuests ? `${n} (one group only)` : n}
+          </option>
+        ))}
       </select>
     </label>
 

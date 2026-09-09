@@ -7,7 +7,7 @@ draft: false
 
 duration: "About 3 hours"
 durationMinutes: 180
-groupSize: { min: 2, max: 6 }
+groupSize: { min: 2, max: 5 }
 
 price:
   amount: 150
@@ -34,7 +34,8 @@ itinerary:
 season:
   from: "January"
   to: "December"
-
+# where-locals-eat.md
+calEvent: "where-locals-actually-eat-in-belgrade"
 hero: "/img/sava-river-belgrade-old-town-dusk.jpg"
 gallery: []
 

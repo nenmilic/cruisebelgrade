@@ -37,7 +37,8 @@ itinerary:
 season:
   from: "April"
   to: "October"
-
+# hidden-fish-tables.md
+calEvent: "hidden-fish-tables-on-the-sava-and-danube"
 hero: "/img/danube-sunset-forest-bank-belgrade.jpg"
 gallery: []
 

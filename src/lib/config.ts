@@ -30,6 +30,8 @@ export const captain = {
   // Airbnb: it is the single strongest trust signal on the page.
   photo: "/img/captain-nenad-belgrade-boat-tour-host.jpg",
   role: "At the tiller since 2019",
+  // The handle that appears on the boat, the stickers and the videos.
+  handle: "@CaptainNenad",
 } as const;
 
 export const social = {
@@ -62,7 +64,12 @@ export const boat = {
   type: "Pasara",
   hull: "V-hull",
   engine: "Yamaha 8HP four-stroke",
-  maxGuests: 6,
+  // Four have room to move and sit properly. A fifth fits when everyone
+  // already knows each other - say so rather than promising space that
+  // isn't there and having someone spend four hours wedged in.
+  comfortableGuests: 4,
+  maxGuests: 5,
+  guestsLabel: "4 comfortably, 5 for one group",
 } as const;
 
 export const meetingPoint = {
@@ -81,8 +88,10 @@ export const meetingPoint = {
  * events - so a slot taken on Airbnb cannot be booked here.
  */
 export const booking = {
-  calUrl:
-    "https://cal.id/captainnenad/cruise-belgrade-s-rivers-with-a-boat-captain",
+  // Your Cal profile. Each tour appends its own event slug via `calEvent`
+  // in the tour's frontmatter, so a booking is always for the trip the
+  // visitor is actually reading about.
+  calBase: "https://cal.id/captainnenad",
   // Shown under the embed so guests know a slot is not final until you say so.
   note: "Requests are confirmed by me, usually within a few hours.",
 } as const;
