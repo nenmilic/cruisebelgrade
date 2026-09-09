@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { getCollection } from "astro:content";
+import MeetingPoint from "../components/MeetingPoint.astro";
 import { site, captain, social, boat, meetingPoint, images } from "../lib/config";
 
 interface Props {
@@ -34,9 +35,11 @@ const schema = {
   email: captain.email,
   address: {
     "@type": "PostalAddress",
+    streetAddress: meetingPoint.address,
     addressLocality: site.city,
     addressCountry: site.country,
   },
+  hasMap: `https://www.google.com/maps/search/?api=1&query=${meetingPoint.lat},${meetingPoint.lng}`,
   geo: {
     "@type": "GeoCoordinates",
     latitude: meetingPoint.lat,
@@ -87,6 +90,8 @@ const year = new Date().getFullYear();
     <a class="skip" href="#main">Skip to content</a>
 
     <slot />
+
+    <MeetingPoint />
 
     <footer class="foot">
       <div class="wrap foot__grid">

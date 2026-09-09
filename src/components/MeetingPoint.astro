@@ -1,0 +1,106 @@
+---
+import { meetingPoint, mapLinks, captain } from "../lib/config";
+
+// Rendered from the footer, so it appears on every page. Somebody deciding
+// whether to book wants to know where they are being asked to turn up, and
+// somebody who has already booked wants it again on the morning of the trip.
+const digits = captain.phoneE164.replace(/\D/g, "");
+---
+
+<section class="mp" aria-labelledby="mp-heading">
+  <div class="wrap mp__inner">
+    <div class="mp__text">
+      <p class="eyebrow">Where we meet</p>
+      <h2 id="mp-heading">{meetingPoint.label}</h2>
+
+      <p class="mp__addr">
+        {meetingPoint.address}<br />
+        <span class="mp__code">{meetingPoint.plusCode}</span>
+      </p>
+
+      <p class="mp__note">{meetingPoint.note}</p>
+
+      <div class="mp__actions">
+        <a class="btn" href={mapLinks.directions} rel="noopener">Get directions</a>
+        <a class="btn btn--ghost" href={`https://wa.me/${digits}`} rel="noopener">
+          Message me
+        </a>
+      </div>
+    </div>
+
+    <div class="mp__map">
+      <iframe
+        title={`Map showing ${meetingPoint.label}, ${meetingPoint.address}`}
+        src={mapLinks.embed}
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+    </div>
+  </div>
+</section>
+
+<style>
+  .mp {
+    background: var(--ground);
+    border-top: 1px solid var(--line);
+    padding: var(--rhythm) 0;
+  }
+  .mp__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: 2rem 3.5rem;
+    align-items: center;
+  }
+
+  .mp h2 {
+    color: var(--cream);
+  }
+  .mp__addr {
+    margin: 1rem 0 0;
+    color: var(--cream-dim);
+    line-height: 1.7;
+  }
+  .mp__code {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    color: var(--amber);
+  }
+  .mp__note {
+    margin: 0.9rem 0 0;
+    font-size: 0.94rem;
+    color: var(--cream-dim);
+    max-width: 34ch;
+  }
+  .mp__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.4rem;
+  }
+
+  .mp__map {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    line-height: 0;
+  }
+  .mp__map iframe {
+    width: 100%;
+    height: clamp(17rem, 34vw, 24rem);
+    border: 0;
+    display: block;
+    /* The map arrives bright white against a dark page. Taking a little
+       light and warmth out of it stops it shouting over everything else. */
+    filter: saturate(0.85) brightness(0.92);
+  }
+
+  @media (max-width: 54rem) {
+    .mp__inner {
+      grid-template-columns: 1fr;
+      gap: 1.6rem;
+    }
+    .mp__map iframe {
+      height: 15rem;
+    }
+  }
+</style>

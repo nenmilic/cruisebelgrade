@@ -73,10 +73,22 @@ export const boat = {
 } as const;
 
 export const meetingPoint = {
-  label: "Čukarički rukavac",
-  note: "Exact pontoon sent with your confirmation.",
-  lat: 44.7866,
-  lng: 20.4189,
+  // Coordinates decoded from the Google plus code QCR9+46, so the pin lands
+  // on the bench itself rather than somewhere along the marina.
+  label: "Prvoslavova klupa",
+  area: "Ada Ciganlija",
+  address: "Ada Ciganlija 2, Belgrade",
+  plusCode: "QCR9+46 Belgrade",
+  note: "I'll be waiting by the boat. Message me when you set off and I'll watch for you.",
+  lat: 44.79031,
+  lng: 20.41806,
+} as const;
+
+/** Ready-made links so no component has to assemble a maps URL itself. */
+export const mapLinks = {
+  view: `https://www.google.com/maps/search/?api=1&query=${meetingPoint.lat},${meetingPoint.lng}`,
+  directions: `https://www.google.com/maps/dir/?api=1&destination=${meetingPoint.lat},${meetingPoint.lng}`,
+  embed: `https://www.google.com/maps?q=${meetingPoint.lat},${meetingPoint.lng}&hl=en&z=16&output=embed`,
 } as const;
 
 /**
