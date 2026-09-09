@@ -1,0 +1,5 @@
+npm run build
+npx wrangler pages deploy dist --project-name cruisebelgrade
+git add .
+git commit -m "Per-tour Cal booking, footer redesign, guest capacity, new brand mark"
+git push
