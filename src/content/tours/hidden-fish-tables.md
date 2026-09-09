@@ -38,7 +38,7 @@ season:
   from: "April"
   to: "October"
 
-hero: "/img/tours/fish-tables-hero.jpg"
+hero: "/img/danube-sunset-forest-bank-belgrade.jpg"
 gallery: []
 
 externalBooking: {}

@@ -33,7 +33,7 @@ itinerary:
 season:
   from: "April"
   to: "October"
-hero: "/img/tours/cruise-hero.jpg"
+hero:  "/img/gazela-bridge-night-belgrade-river-cruise.jpg"
 ---
 
 The shortest of the three trips, and the one to take if you have an afternoon rather than a day. No restaurant stop, no long lunch, just the rivers, the bridges and the fortress from the water.

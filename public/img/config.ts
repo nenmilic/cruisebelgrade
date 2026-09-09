@@ -22,19 +22,18 @@ export const captain = {
   name: "Nenad",
   displayName: "Captain Nenad",
   // Shown publicly. Use the number you actually answer.
-  phone: "+381 63 80 275 90",
-  phoneE164: "+381638027590",
-  email: "milicnen@gmail.com",
-  whatsapp: "381638027590",
+  phone: "+381 XX XXX XXXX",
+  phoneE164: "+381XXXXXXXXX",
+  email: "hello@cruisebelgrade.rs",
+  whatsapp: "381XXXXXXXXX",
 } as const;
 
 export const social = {
-  instagram: "",
-  tiktok: "https://www.tiktok.com/@captain.cruise.belgrade",
+  instagram: "https://instagram.com/cruisebelgrade",
+  tiktok: "https://tiktok.com/@cruisebelgrade",
   // Existing channels stay live — the site is the hub, not a replacement.
-  airbnb: "https://airbnb.com/x/bgriverexp",
-  getyourguide:
-    "https://www.getyourguide.com/belgrade-l1688/belgrade-private-sunset-boat-tour-with-photography-t1352785",
+  airbnb: "",
+  getyourguide: "",
 } as const;
 
 /**
@@ -45,7 +44,7 @@ export const social = {
  * than a broken image.
  */
 export const images = {
-  hero: "/img/brankov-most-night-belgrade-boat-tour.jpg",
+  hero: "/img/hero.jpg",
 } as const;
 
 export const boat = {

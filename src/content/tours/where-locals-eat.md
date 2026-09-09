@@ -35,7 +35,7 @@ season:
   from: "January"
   to: "December"
 
-hero: "/img/tours/locals-hero.jpg"
+hero: "/img/sava-river-belgrade-old-town-dusk.jpg"
 gallery: []
 
 externalBooking: {}
