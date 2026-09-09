@@ -7,15 +7,15 @@ draft: false
 
 duration: "About 4 hours"
 durationMinutes: 240
-groupSize: { min: 2, max: 6 }
+groupSize: { min: 2, max: 5 }
 
 price:
-  amount: 0
+  amount: 150
   currency: "EUR"
   per: "person"
   includes:
     - "Boat, fuel and captain"
-    - "Fish soup and grilled river fish"
+    - "Fish soup, salats,drinks and grilled river fish"
     - "Bread, salad, water"
   excludes:
     - "Wine, rakija and other drinks"
@@ -54,6 +54,6 @@ people who eat there have always come, and you tie up a few steps from the
 table.
 
 The boat is a pasara — the traditional Belgrade river boat, V-hulled, so it
-cuts through the wake of passing barges instead of slapping over it. Six
+cuts through the wake of passing barges instead of slapping over it. Five
 guests at most. There is shade, there is room to move, and there is nobody
 else's tour group on board.

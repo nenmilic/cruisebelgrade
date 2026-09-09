@@ -6,9 +6,10 @@ import { site } from "../../lib/config";
 
 export async function getStaticPaths() {
   const tours = await getCollection("tours", ({ data }) => !data.draft);
-  return tours.map((tour) => ({
+  const all = [...tours].sort((a, b) => a.data.order - b.data.order);
+  return all.map((tour) => ({
     params: { slug: tour.slug },
-    props: { tour, all: tours.sort((a, b) => a.data.order - b.data.order) },
+    props: { tour, all },
   }));
 }
 
