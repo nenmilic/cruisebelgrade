@@ -153,11 +153,11 @@ const today = new Date().toISOString().slice(0, 10);
 
 <style>
   .enq {
-    background: var(--stone);
-    color: var(--ink);
+    background: var(--paper);
+    color: var(--paper-ink);
     padding: clamp(1.5rem, 4vw, 2.75rem);
-    border: 1px solid rgba(16, 26, 28, 0.16);
-    border-radius: 3px;
+    border: 1px solid rgba(16, 26, 28, 0.14);
+    border-radius: 8px;
   }
 
   .enq__grid {
@@ -204,7 +204,7 @@ const today = new Date().toISOString().slice(0, 10);
   input:focus,
   select:focus,
   textarea:focus {
-    border-color: var(--shallow);
+    border-color: var(--amber-deep);
   }
 
   .hp {
@@ -232,7 +232,7 @@ const today = new Date().toISOString().slice(0, 10);
     font-weight: 500;
   }
   .enq__status[data-state="ok"] {
-    color: var(--reed);
+    color: #4b6b2f;
   }
   .enq__status[data-state="bad"] {
     color: #9c3b1f;

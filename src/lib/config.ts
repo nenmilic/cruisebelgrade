@@ -26,6 +26,10 @@ export const captain = {
   phoneE164: "+381638027590",
   email: "milicnen@gmail.com",
   whatsapp: "381638027590",
+  // Face of the business. Shown in the header the way a host photo works on
+  // Airbnb: it is the single strongest trust signal on the page.
+  photo: "/img/captain-nenad-belgrade-boat-tour-host.jpg",
+  role: "At the tiller since 2019",
 } as const;
 
 export const social = {
@@ -45,7 +49,13 @@ export const social = {
  * than a broken image.
  */
 export const images = {
-  hero: "/img/brankov-most-night-belgrade-boat-tour.jpg",
+  hero: "/img/danube-sunset-forest-bank-belgrade.jpg",
+  // Small round window in the header, opposite the host photo. Purely
+  // atmospheric - a glimpse of what the trip actually looks like.
+  headerGlimpse: "/img/guest-relaxing-bow-danube-summer-cruise.jpg",
+  // The brand mark. Used as a faint watermark over the hero and solid in
+  // the footer. Same file for both - the CSS does the tinting.
+  logo: "/img/logo-belgrade-from-the-rivers.png",
 } as const;
 
 export const boat = {
@@ -60,6 +70,21 @@ export const meetingPoint = {
   note: "Exact pontoon sent with your confirmation.",
   lat: 44.7866,
   lng: 20.4189,
+} as const;
+
+/**
+ * Scheduling. Paste the full public booking page URL from Cal (cal.id or
+ * cal.com). Leave it empty and the booking section falls back to the
+ * enquiry form on its own.
+ *
+ * Availability comes from Google Calendar, which already receives Airbnb
+ * events - so a slot taken on Airbnb cannot be booked here.
+ */
+export const booking = {
+  calUrl:
+    "https://cal.id/captainnenad/cruise-belgrade-s-rivers-with-a-boat-captain",
+  // Shown under the embed so guests know a slot is not final until you say so.
+  note: "Requests are confirmed by me, usually within a few hours.",
 } as const;
 
 /**

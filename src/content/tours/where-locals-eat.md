@@ -10,7 +10,7 @@ durationMinutes: 180
 groupSize: { min: 2, max: 6 }
 
 price:
-  amount: 0
+  amount: 150
   currency: "EUR"
   per: "person"
   includes:

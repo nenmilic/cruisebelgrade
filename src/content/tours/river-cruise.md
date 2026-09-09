@@ -8,7 +8,7 @@ duration: "About 90 minutes"
 durationMinutes: 90
 groupSize: { min: 2, max: 6 }
 price:
-  amount: 0
+  amount: 50
   currency: "EUR"
   per: "group"
   includes:

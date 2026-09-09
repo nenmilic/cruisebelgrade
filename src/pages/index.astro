@@ -2,97 +2,205 @@
 import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import BookingForm from "../components/BookingForm.astro";
-import { site, boat, meetingPoint, captain, images } from "../lib/config";
+import { site, boat, meetingPoint, captain, images, social, booking } from "../lib/config";
 
 const tours = (await getCollection("tours", ({ data }) => !data.draft)).sort(
   (a, b) => a.data.order - b.data.order,
 );
 
 const formTours = tours.map((t) => ({ slug: t.slug, title: t.data.shortTitle }));
+
+// Everything in the facts strip is computed, so it can never contradict the
+// tour pages. Add a shorter trip and the strip updates itself.
+const lengths = tours.map((t) => t.data.durationMinutes).sort((a, b) => a - b);
+const prices = tours.map((t) => t.data.price.amount).filter((n) => n > 0);
+
+const facts = [
+  { value: `Up to ${boat.maxGuests}`, label: "guests on board" },
+  {
+    value:
+      lengths.length > 1 && lengths[0] !== lengths[lengths.length - 1]
+        ? `${formatMinutes(lengths[0])} – ${formatMinutes(lengths[lengths.length - 1])}`
+        : formatMinutes(lengths[0] ?? 0),
+    label: "trip length",
+  },
+  prices.length
+    ? { value: `From \u20ac${Math.min(...prices)}`, label: "booked direct" }
+    : null,
+  { value: meetingPoint.label, label: "we leave from" },
+].filter((f): f is { value: string; label: string } => f !== null);
+
+/** 90 -> "90 min", 240 -> "4 h". Keeps the strip readable at a glance. */
+function formatMinutes(m: number) {
+  if (m < 120) return `${m} min`;
+  const hours = Math.round((m / 60) * 2) / 2;
+  return `${hours} h`;
+}
+
+/** Formats a tour price, or returns null when no price is set yet. */
+function priceLabel(price: { amount: number; currency: string; per: string }) {
+  if (!price.amount) return null;
+  const symbol = price.currency === "EUR" ? "\u20ac" : "";
+  const value = symbol
+    ? `${symbol}${price.amount}`
+    : `${price.amount} ${price.currency}`;
+  return { value, per: price.per === "group" ? "for the boat" : "per person" };
+}
 ---
 
 <Base>
-  <header class="hero" data-has-image={images.hero ? "true" : "false"}>
-    {
-      images.hero && (
-        <img class="hero__img" src={images.hero} alt="" width="1600" height="900" fetchpriority="high" />
-      )
-    }
+  <header class="hero">
+    {images.hero && (
+      <img class="hero__img" src={images.hero} alt="" width="1800" height="1200" fetchpriority="high" />
+    )}
+
+    <div class="wrap hero__bar">
+      <a class="who" href="#book">
+        <img class="who__face" src={captain.photo} alt={`${captain.displayName}, your host`} width="96" height="96" />
+        <span class="who__text">
+          <strong>{captain.displayName}</strong>
+          <em>{captain.role}</em>
+        </span>
+      </a>
+
+    </div>
+
+    {images.logo && (
+      <img class="watermark" src={images.logo} alt="" width="900" height="900" aria-hidden="true" />
+    )}
+
+    <div class="aside">
+      {images.headerGlimpse && (
+        <span class="glimpse" aria-hidden="true">
+          <img src={images.headerGlimpse} alt="" width="640" height="640" />
+        </span>
+      )}
+
+      {(social.airbnb || social.getyourguide) && (
+        <div class="also">
+          <p class="also__label">Also listed on</p>
+
+          <div class="also__logos">
+            {social.airbnb && (
+              <a href={social.airbnb} rel="noopener">
+                <img src="/img/logo-airbnb.png" alt="Airbnb" width="577" height="789" />
+              </a>
+            )}
+            {social.getyourguide && (
+              <a href={social.getyourguide} rel="noopener">
+                <img src="/img/logo-getyourguide.svg" alt="GetYourGuide" width="774" height="600" />
+              </a>
+            )}
+          </div>
+
+          <p class="also__fee">
+            Both add a booking fee on top. The price on this page is the direct
+            one.
+          </p>
+        </div>
+      )}
+    </div>
+
     <div class="wrap hero__inner">
       <p class="hero__kicker">{meetingPoint.label} · {site.city}</p>
       <h1>The riverside places locals keep to themselves</h1>
       <p class="hero__lede">
         Small-boat trips down the Sava and the Danube to fish restaurants set
-        back in the trees along the bank. Six guests at a time, no coach party,
-        no schedule but ours.
+        back in the trees. {boat.maxGuests} guests at a time, no coach party.
       </p>
-      <a class="btn hero__cta" href="#book">Check a date</a>
+      <div class="hero__actions">
+        <a class="btn" href="#book">Check a date</a>
+        <a class="btn btn--ghost" href="#trips">See the trips</a>
+      </div>
     </div>
-    <div class="hero__seam" aria-hidden="true"></div>
   </header>
 
   <main id="main">
+    <section class="facts" aria-label="At a glance">
+      <ul class="wrap facts__list">
+        {facts.map((f) => (
+          <li class="fact">
+            <span class="fact__value">{f.value}</span>
+            <span class="fact__label">{f.label}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
     <section class="intro">
       <div class="wrap intro__inner">
-        <p class="rkm">rkm 1170 — Sava confluence</p>
         <p class="intro__text">
-          These places have roads to them. They are just far enough back that
-          nobody arrives by accident, and the way in has always been the water.
+          These places have roads to them. They sit far enough back that nobody
+          arrives by accident, and the way in has always been the water.
+        </p>
+        <p class="intro__sub">
           You tie up a few steps from the table, eat what came out of the river
           that morning, and go back the way you came.
         </p>
       </div>
     </section>
 
-    <section class="trips" aria-labelledby="trips-heading">
+    <section class="trips" id="trips" aria-labelledby="trips-heading">
       <div class="wrap">
-        <p class="rkm">{tours.length} trips</p>
-        <h2 id="trips-heading">Pick the one that suits the day</h2>
-
-        <div class="trips__list">
-          {
-            tours.map((tour, i) => (
-              <article class="trip">
-                {tour.data.hero && (
-                  <a class="trip__shot" href={`/tours/${tour.slug}/`} tabindex="-1" aria-hidden="true">
-                    <img src={tour.data.hero} alt="" loading={i === 0 ? "eager" : "lazy"} width="800" height="600" />
-                  </a>
-                )}
-                <div class="trip__head">
-                  <h3>{tour.data.title}</h3>
-                  <p class="trip__facts">
-                    {tour.data.duration} · {tour.data.groupSize.min}–
-                    {tour.data.groupSize.max} guests · {tour.data.season.from} to{" "}
-                    {tour.data.season.to}
-                  </p>
-                </div>
-
-                <div class="trip__body">
-                  <p>{tour.data.summary}</p>
-
-                  {tour.data.price.includes.length > 0 && (
-                    <ul class="trip__inc">
-                      {tour.data.price.includes.map((item) => (
-                        <li>{item}</li>
-                      ))}
-                    </ul>
-                  )}
-
-                  <a class="btn btn--ghost trip__link" href={`/tours/${tour.slug}/`}>
-                    See the whole day
-                  </a>
-                </div>
-              </article>
-            ))
-          }
+        <div class="trips__top">
+          <div>
+            <p class="eyebrow">{tours.length} trips</p>
+            <h2 id="trips-heading">Pick the one that suits the day</h2>
+          </div>
+          <p class="trips__note">
+            All of them leave from {meetingPoint.label} and come back to the
+            same pontoon.
+          </p>
         </div>
+
+        <ul class="cards">
+          {tours.map((tour, i) => (
+            <li class="card">
+              <a class="card__link" href={`/tours/${tour.slug}/`}>
+                <div class="card__shot">
+                  {tour.data.hero && (
+                    <img
+                      src={tour.data.hero}
+                      alt=""
+                      loading={i === 0 ? "eager" : "lazy"}
+                      width="800"
+                      height="600"
+                    />
+                  )}
+                  <span class="card__dur">{tour.data.duration}</span>
+                </div>
+
+                <h3 class="card__title">{tour.data.title}</h3>
+
+                {priceLabel(tour.data.price) && (
+                  <p class="card__price">
+                    <strong>{priceLabel(tour.data.price)!.value}</strong>
+                    <span>{priceLabel(tour.data.price)!.per}</span>
+                  </p>
+                )}
+
+                <p class="card__sum">{tour.data.summary}</p>
+
+                {tour.data.price.includes.length > 0 && (
+                  <ul class="card__inc">
+                    {tour.data.price.includes.slice(0, 3).map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                )}
+
+                <span class="card__go">See the whole day</span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
 
     <section class="boat" aria-labelledby="boat-heading">
       <div class="wrap boat__inner">
-        <div>
-          <p class="rkm">The boat</p>
+        <div class="boat__text">
+          <p class="eyebrow">The boat</p>
           <h2 id="boat-heading">A pasara, not a party barge</h2>
           <p>
             The pasara is the traditional Belgrade river boat. Mine is
@@ -101,11 +209,12 @@ const formTours = tours.map((t) => ({ slug: t.slug, title: t.data.shortTitle }))
             it, so lunch stays where you left it on the way home.
           </p>
           <p>
-            {boat.engine}, shade, room to move, and {boat.maxGuests} guests at
-            most. I am at the tiller the whole way, so ask me anything —
-            about the river, the city, or where the fish came from.
+            Shade, room to move, and {boat.maxGuests} guests at most. I am at
+            the tiller the whole way, so ask me anything about the river, the
+            city, or where the fish came from.
           </p>
         </div>
+
         <dl class="spec">
           <div><dt>Boat</dt><dd>{boat.type}</dd></div>
           <div><dt>Hull</dt><dd>{boat.hull}</dd></div>
@@ -119,11 +228,11 @@ const formTours = tours.map((t) => ({ slug: t.slug, title: t.data.shortTitle }))
     <section class="book" id="book" aria-labelledby="book-heading">
       <div class="wrap book__inner">
         <div class="book__aside">
-          <p class="rkm">Booking</p>
+          <p class="eyebrow">Booking</p>
           <h2 id="book-heading">Tell me when</h2>
           <p>
-            Send the date and I'll confirm whether it's free, usually within a
-            few hours. Nothing is charged now.
+            Send a date and I'll confirm whether it's free, usually within a few
+            hours. Nothing is charged now.
           </p>
           <p class="book__direct">
             Rather write directly?<br />
@@ -133,7 +242,27 @@ const formTours = tours.map((t) => ({ slug: t.slug, title: t.data.shortTitle }))
         </div>
 
         <div class="book__form">
-          <BookingForm tours={formTours} />
+          {booking.calUrl ? (
+            <div class="cal">
+              <iframe
+                class="cal__frame"
+                src={booking.calUrl}
+                title="Choose a date and time"
+                loading="lazy"
+                allow="camera; microphone; autoplay; fullscreen; clipboard-write; payment"
+              ></iframe>
+              <p class="cal__note">{booking.note}</p>
+
+              <details class="cal__alt">
+                <summary>Rather send a message instead?</summary>
+                <div class="cal__altinner">
+                  <BookingForm tours={formTours} />
+                </div>
+              </details>
+            </div>
+          ) : (
+            <BookingForm tours={formTours} />
+          )}
         </div>
       </div>
     </section>
@@ -141,26 +270,135 @@ const formTours = tours.map((t) => ({ slug: t.slug, title: t.data.shortTitle }))
 </Base>
 
 <style>
-  /* --- Hero: dark water, headline sitting low like a boat in it --- */
+  /* ---------- Hero ---------- */
   .hero {
-    background: var(--danube);
-    color: var(--stone);
-    padding: clamp(5rem, 16vh, 10rem) 0 clamp(3.5rem, 9vh, 6rem);
     position: relative;
     isolation: isolate;
     overflow: hidden;
+    min-height: min(88vh, 46rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 0 clamp(3rem, 7vw, 5rem);
   }
-  .hero::after {
-    content: "";
+
+  /* --- Header bar: host on the left, a glimpse of the trip on the right --- */
+  .hero__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .who {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    padding: 0.3rem 0.85rem 0.3rem 0.3rem;
+    border-radius: 100px;
+    background: rgba(9, 26, 30, 0.42);
+    border: 1px solid rgba(244, 239, 230, 0.16);
+    backdrop-filter: blur(8px);
+    transition: border-color 150ms ease, background 150ms ease;
+  }
+  .who:hover {
+    border-color: rgba(240, 160, 60, 0.6);
+    background: rgba(9, 26, 30, 0.62);
+  }
+  .who__face {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 30%;
+    flex: none;
+  }
+  .who__text {
+    display: grid;
+    line-height: 1.25;
+  }
+  .who__text strong {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--cream);
+  }
+  .who__text em {
+    font-style: normal;
+    font-size: 0.74rem;
+    color: var(--cream-dim);
+  }
+
+  /*
+    A round window into the trip, roughly a third of the hero. Big enough
+    to read as a second photograph rather than an avatar, sitting clear of
+    the headline in the top right.
+  */
+  /* Round window plus the platforms it is also sold on, stacked top right. */
+  .aside {
     position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(
-      180deg,
-      rgba(14, 42, 49, 0.62) 0%,
-      rgba(14, 42, 49, 0.88) 72%,
-      rgba(14, 42, 49, 0.96) 100%
-    );
+    top: clamp(4.5rem, 9vh, 7rem);
+    right: var(--gutter);
+    z-index: 1;
+    width: clamp(9rem, 23vw, 17rem);
+    display: grid;
+    justify-items: center;
+    gap: 1.1rem;
+  }
+  .glimpse {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(244, 239, 230, 0.3);
+    box-shadow: 0 18px 50px rgba(6, 18, 22, 0.45);
+  }
+
+  .also {
+    text-align: center;
+  }
+  .also__label {
+    margin: 0 0 0.6rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    text-shadow: 0 1px 12px rgba(6, 18, 22, 0.7);
+    max-width: none;
+  }
+  .also__logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.1rem;
+  }
+  .also__logos a {
+    display: block;
+    opacity: 0.85;
+    transition: opacity 150ms ease, transform 150ms ease;
+  }
+  .also__logos a:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+  .also__logos img {
+    height: clamp(1.9rem, 3vw, 2.5rem);
+    width: auto;
+  }
+  .also__fee {
+    margin: 0.75rem 0 0;
+    font-size: 0.68rem;
+    line-height: 1.45;
+    color: var(--cream-dim);
+    text-shadow: 0 1px 12px rgba(6, 18, 22, 0.75);
+    max-width: none;
+  }
+  .glimpse img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 52% 45%;
   }
   .hero__img {
     position: absolute;
@@ -169,190 +407,431 @@ const formTours = tours.map((t) => ({ slug: t.slug, title: t.data.shortTitle }))
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 60%;
+    object-position: center 52%;
+    filter: saturate(1.14) contrast(1.05);
+  }
+  /* Weighted to the bottom-left, where the type sits, so the top of the
+     photograph stays open. A flat overlay turns a sunset to mud. */
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(
+        4deg,
+        rgba(9, 26, 30, 0.94) 0%,
+        rgba(9, 26, 30, 0.7) 34%,
+        rgba(9, 26, 30, 0.12) 66%,
+        rgba(9, 26, 30, 0.34) 100%
+      ),
+      linear-gradient(
+        95deg,
+        rgba(9, 26, 30, 0.6) 0%,
+        rgba(9, 26, 30, 0.1) 55%,
+        rgba(9, 26, 30, 0) 100%
+      );
   }
   .hero__inner {
-    max-width: 54rem;
-  }
-  .hero__kicker {
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: var(--silt);
-    margin: 0 0 1.4rem;
-  }
-  .hero h1 {
-    color: var(--stone);
-    font-variation-settings: "opsz" 60;
-    font-weight: 300;
-  }
-  .hero__lede {
-    margin-top: 1.6rem;
-    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
-    color: var(--stone-dim);
-    max-width: 46ch;
-  }
-  .hero__cta {
-    margin-top: 1.4rem;
-    background: var(--varnish);
-    border-color: var(--varnish);
-    color: var(--ink);
-  }
-  .hero__cta:hover {
-    background: var(--stone);
-    border-color: var(--stone);
+    max-width: 44rem;
+    position: relative;
+    z-index: 2;
   }
 
   /*
-    The seam. Where the Sava meets the Danube the two waters run side by
-    side before they mix, and you can see the line. This is the one
-    decorative moment on the page and it is doing that job.
+    Brand mark stamped faintly into the photograph. The file is dark slate,
+    so it is knocked out to white here and dropped to a fifth opacity -
+    present if you look for it, invisible if you are reading.
   */
-  .hero__seam {
+  .watermark {
     position: absolute;
-    inset-inline: 0;
-    bottom: 0;
-    height: 3px;
-    background: linear-gradient(
-      90deg,
-      var(--silt) 0%,
-      var(--silt) 38%,
-      var(--shallow) 52%,
-      var(--shallow) 100%
-    );
+    left: 60%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: clamp(9rem, 24vw, 21rem);
+    height: auto;
+    opacity: 0.2;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
+    user-select: none;
+  }
+  @media (min-width: 60rem) {
+    .hero__inner {
+      max-width: 40rem;
+    }
+  }
+  .hero__kicker {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin: 0 0 1rem;
+  }
+  .hero h1 {
+    color: var(--cream);
+    text-shadow: 0 2px 30px rgba(6, 18, 22, 0.5);
+  }
+  .hero__lede {
+    margin: 1.2rem 0 0;
+    font-size: clamp(1.02rem, 1.5vw, 1.2rem);
+    color: var(--cream);
+    max-width: 40ch;
+    text-shadow: 0 1px 18px rgba(6, 18, 22, 0.6);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1.8rem;
   }
 
-  /* --- Intro --- */
-  .intro {
-    padding: var(--rhythm) 0;
+  /* ---------- Facts strip: stops the page going quiet after the hero ---- */
+  .facts {
+    background: var(--ground-lift);
+    border-bottom: 1px solid var(--line);
   }
-  .intro__inner {
-    max-width: 46rem;
+  .facts__list {
+    list-style: none;
+    margin-block: 0;
+    margin-inline: auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  }
+  .fact {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: center;
+    text-align: center;
+    padding: 1.4rem 1rem;
+    border-left: 1px solid var(--line);
+  }
+  .fact:first-child {
+    border-left: 0;
+  }
+  .fact__value {
+    font-family: var(--display);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--amber);
+    line-height: 1.1;
+  }
+  .fact__label {
+    font-size: 0.76rem;
+    letter-spacing: 0.02em;
+    color: var(--cream-dim);
+  }
+
+  /* ---------- Intro ---------- */
+  .intro {
+    padding: calc(var(--rhythm) * 0.72) 0 calc(var(--rhythm) * 0.5);
+    background: var(--ground);
+  }
+  /* Intro and the trips heading share one grid, so the right-hand column
+     starts at the same x on both and the page reads as stacked blocks
+     rather than scattered paragraphs. */
+  .intro__inner,
+  .trips__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 1rem 3rem;
+    align-items: start;
   }
   .intro__text {
     font-family: var(--display);
-    font-size: clamp(1.3rem, 2.6vw, 1.85rem);
-    font-variation-settings: "opsz" 28;
-    line-height: 1.42;
+    font-size: clamp(1.35rem, 2.6vw, 2rem);
+    font-weight: 500;
+    line-height: 1.16;
+    letter-spacing: -0.03em;
+    margin: 0;
+    max-width: 24ch;
+  }
+  .intro__sub {
+    margin: 0;
+    padding-top: 0.4rem;
+    font-size: 0.96rem;
+    color: var(--cream-dim);
     max-width: 34ch;
   }
 
-  /* --- Trips: asymmetric, not identical cards --- */
+  /* ---------- Trips: real cards, no dead columns ---------- */
   .trips {
     padding: 0 0 var(--rhythm);
   }
-  .trips__list {
-    margin-top: 2.75rem;
-    display: grid;
-    gap: 2.5rem;
+  .trips__top {
+    padding-bottom: 1.6rem;
+    border-bottom: 1px solid var(--line);
   }
-  .trip {
-    display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 5fr);
-    gap: 1.5rem 2.5rem;
-    padding-top: 2.25rem;
-    border-top: 1px solid rgba(16, 26, 28, 0.22);
-    align-items: start;
+  .trips__note {
+    margin: 0;
+    color: var(--cream-dim);
+    font-size: 0.92rem;
+    max-width: 32ch;
   }
-  .trip__shot {
-    display: block;
+
+  .cards {
+    list-style: none;
+    margin: 2.25rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: 1.5rem;
+  }
+  .card {
+    background: var(--ground-lift);
+    border: 1px solid var(--line);
+    border-radius: 6px;
     overflow: hidden;
-    border-radius: 2px;
-    background: var(--danube);
+    transition: border-color 160ms ease, transform 160ms ease;
   }
-  .trip__shot img {
+  .card:hover {
+    border-color: rgba(240, 160, 60, 0.5);
+    transform: translateY(-2px);
+  }
+  .card__link {
+    display: block;
+    padding: 0 1.25rem 1.4rem;
+    text-decoration: none;
+    height: 100%;
+  }
+  .card__shot {
+    position: relative;
+    margin: 0 -1.25rem 1.15rem;
+    background: var(--surface);
+  }
+  .card__shot img {
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
   }
-  .trip__facts {
-    margin: 0.7rem 0 0;
-    font-size: 0.88rem;
-    color: rgba(16, 26, 28, 0.62);
+  .card__dur {
+    position: absolute;
+    left: 0.85rem;
+    bottom: 0.85rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.32rem 0.7rem;
+    border-radius: 100px;
+    background: rgba(9, 26, 30, 0.82);
+    color: var(--cream);
+    backdrop-filter: blur(4px);
   }
-  .trip__inc {
-    margin: 0 0 1.4rem;
-    padding-left: 1.1rem;
-    font-size: 0.94rem;
-    color: rgba(16, 26, 28, 0.78);
+  .card__title {
+    color: var(--cream);
+    margin: 0 0 0.6rem;
   }
-  .trip__inc li {
-    margin-bottom: 0.25rem;
+  .card__price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.42rem;
+    margin: 0 0 0.75rem;
   }
-  .trip__link {
-    font-size: 0.94rem;
-    padding: 0.65rem 1.2rem;
+  .card__price strong {
+    font-family: var(--display);
+    font-size: 1.32rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--amber);
+  }
+  .card__price span {
+    font-size: 0.78rem;
+    color: var(--cream-dim);
   }
 
-  /* --- Boat --- */
-  .boat {
-    background: var(--danube);
-    color: var(--stone-dim);
-    padding: var(--rhythm) 0;
+  .card__sum {
+    margin: 0 0 1rem;
+    font-size: 0.94rem;
+    color: var(--cream-dim);
+    max-width: none;
   }
-  .boat h2 {
-    color: var(--stone);
+  .card__inc {
+    margin: 0 0 1.2rem;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .card__inc li {
+    font-size: 0.76rem;
+    padding: 0.28rem 0.62rem;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    color: var(--cream-dim);
+  }
+  .card__go {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+  .card:hover .card__go {
+    text-decoration: underline;
+  }
+
+  /* ---------- Boat ---------- */
+  .boat {
+    padding: var(--rhythm) 0;
+    border-top: 1px solid var(--line);
   }
   .boat__inner {
     display: grid;
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    gap: 3rem;
+    gap: 2rem 4rem;
     align-items: start;
   }
-  .boat p {
-    margin-top: 1.4rem;
+  .boat__text p {
+    margin-top: 1.2rem;
+    color: var(--cream-dim);
   }
   .spec {
     margin: 0;
-    border-top: 1px solid rgba(228, 226, 216, 0.22);
+    border-top: 1px solid var(--line);
   }
   .spec > div {
     display: flex;
     justify-content: space-between;
     gap: 1.5rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(228, 226, 216, 0.14);
-    font-size: 0.92rem;
+    padding: 0.72rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.9rem;
   }
   .spec dt {
-    color: var(--silt);
+    color: var(--cream-dim);
   }
   .spec dd {
     margin: 0;
-    color: var(--stone);
+    color: var(--cream);
     text-align: right;
+    font-weight: 500;
   }
 
-  /* --- Booking --- */
+  /* ---------- Booking ---------- */
   .book {
     padding: var(--rhythm) 0;
+    border-top: 1px solid var(--line);
   }
   .book__inner {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    gap: 3rem;
+    gap: 2.5rem 4rem;
     align-items: start;
   }
   .book__aside p {
-    margin-top: 1.3rem;
+    margin-top: 1.1rem;
+    color: var(--cream-dim);
   }
   .book__direct {
-    font-size: 0.95rem;
-    line-height: 1.9;
+    font-size: 0.94rem;
+    line-height: 1.85;
+  }
+  .book__direct a {
+    color: var(--amber);
   }
 
-  @media (max-width: 52rem) {
-    .trip,
+  /* ---------- Cal embed ---------- */
+  .cal__frame {
+    width: 100%;
+    height: clamp(38rem, 78vh, 46rem);
+    border: 0;
+    border-radius: 10px;
+    background: var(--paper);
+    display: block;
+  }
+  .cal__note {
+    margin: 0.85rem 0 0;
+    font-size: 0.86rem;
+    color: var(--cream-dim);
+  }
+  .cal__alt {
+    margin-top: 1.4rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1.1rem;
+  }
+  .cal__alt summary {
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--amber);
+    list-style: none;
+  }
+  .cal__alt summary::-webkit-details-marker {
+    display: none;
+  }
+  .cal__alt summary::before {
+    content: "+ ";
+  }
+  .cal__alt[open] summary::before {
+    content: "\2212 ";
+  }
+  .cal__altinner {
+    margin-top: 1.1rem;
+  }
+
+  @media (max-width: 46rem) {
+    .also__fee {
+      display: none;
+    }
+    .watermark {
+      left: 50%;
+      top: auto;
+      bottom: 1.5rem;
+      transform: translateX(-50%);
+      width: 11rem;
+      opacity: 0.14;
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .aside {
+      width: 7.5rem;
+      top: 4.6rem;
+      right: 1rem;
+      gap: 0.7rem;
+    }
+    .glimpse {
+      border-width: 1px;
+    }
+    .also__label {
+      display: none;
+    }
+    .also__logos {
+      gap: 0.7rem;
+    }
+    .also__logos img {
+      height: 1.5rem;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .facts__list {
+      grid-template-columns: 1fr 1fr;
+    }
+    .fact {
+      padding: 1rem 0 1rem 1.1rem;
+    }
+    .fact:nth-child(odd) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .fact:nth-child(n + 3) {
+      border-top: 1px solid var(--line);
+    }
+  }
+
+  @media (max-width: 54rem) {
+    .intro__inner,
+    .trips__top,
     .boat__inner,
     .book__inner {
       grid-template-columns: 1fr;
     }
-    .trip__shot img {
-      aspect-ratio: 16 / 9;
-    }
-    .boat__inner,
-    .book__inner {
-      gap: 2.25rem;
+    .intro__inner,
+    .trips__top {
+      gap: 0.9rem;
     }
   }
 </style>
