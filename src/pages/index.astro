@@ -718,6 +718,47 @@ function priceLabel(price: { amount: number; currency: string; per: string }) {
     color: var(--amber);
   }
 
+  /*
+    Below desktop widths the headline needs the full frame, so the round
+    window stops floating over it and takes its own place in the flow,
+    centred in the gap between the host bar and the type. Absolute
+    positioning here only ever collided with something.
+  */
+  @media (max-width: 60rem) {
+    .aside {
+      position: static;
+      width: 100%;
+      justify-items: center;
+      gap: 0.9rem;
+      padding: 1.5rem var(--gutter) 0;
+    }
+    .glimpse {
+      width: clamp(7rem, 32vw, 11rem);
+      border-width: 1px;
+    }
+    .also__fee {
+      display: none;
+    }
+    .also__logos img {
+      height: 1.7rem;
+    }
+    .watermark {
+      left: 50%;
+      top: auto;
+      bottom: 1.25rem;
+      transform: translateX(-50%);
+      width: 10rem;
+      opacity: 0.12;
+    }
+    .hero {
+      min-height: 0;
+      padding-bottom: clamp(2.5rem, 8vw, 4rem);
+    }
+    .hero__inner {
+      padding-top: 1.75rem;
+    }
+  }
+
   @media (max-width: 40rem) {
     .facts__list {
       grid-template-columns: 1fr 1fr;
@@ -746,4 +787,23 @@ function priceLabel(price: { amount: number; currency: string; per: string }) {
       gap: 0.9rem;
     }
   }
+  @media (max-width: 34rem) {
+    .aside {
+      padding-top: 1.1rem;
+    }
+    .glimpse {
+      width: 8rem;
+    }
+    .also__label {
+      font-size: 0.62rem;
+      margin-bottom: 0.45rem;
+    }
+    .also__logos {
+      gap: 0.9rem;
+    }
+    .also__logos img {
+      height: 1.5rem;
+    }
+  }
+
 </style>
